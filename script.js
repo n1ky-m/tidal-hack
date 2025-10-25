@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('file-input');
   const gallery = document.getElementById('gallery');
   const createBtn = document.getElementById('create-recipe');
+  const removeBtn = document.getElementById('remove-images');
 
   function preventDefaults(e){ e.preventDefault(); e.stopPropagation(); }
   ['dragenter','dragover','dragleave','drop'].forEach(evt=>{
@@ -100,4 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigate to recipe page
     window.location.href = 'recipe.html';
   });
+
+  // Remove images handler: clear gallery and sessionStorage
+  if (removeBtn) {
+    removeBtn.addEventListener('click', ()=>{
+      uploaded = [];
+      sessionStorage.removeItem('uploadedImages');
+      // clear thumbnails
+      gallery.innerHTML = '';
+    });
+  }
 });
