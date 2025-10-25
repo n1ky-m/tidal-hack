@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analysis — Ingredient Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside id="sidebar" class="collapsed" aria-hidden="false">
+      <button id="sidebar-toggle" aria-label="Toggle navigation" title="Open menu">☰</button>
+      <nav id="sidebar-nav" class="hidden">
+        <a href="website.html" data-target="home" class="nav-item">Home</a>
+        <a href="analysis.html" class="nav-item active">Analysis</a>
+      </nav>
+    </aside>
+
+    <main id="main">
+      <header class="greeting">
+        <h1>Hello, <span id="username">Name</span></h1>
+        <p class="subtitle">Weekly analysis of your ingredient inputs and habits</p>
+      </header>
+
+      <section style="padding:28px">
+        <div class="recipe-wrap">
+          <div class="panel">
+            <h3>Weekly Analysis</h3>
+            <p class="metric" id="analysis-summary">Loading your weekly summary...</p>
+            <div class="chart-wrap">
+              <canvas id="weekChart" width="700" height="280"></canvas>
+            </div>
+            <div id="analysis-details" style="margin-top:12px">
+              <h4>Details</h4>
+              <p class="metric">This view summarizes how many ingredient images you processed each day. Use this to track consistency and identify trends.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:18px">
+            <h4>Recent uploads</h4>
+            <div id="uploaded-list" class="gallery"></div>
+          </div>
+
+          <div class="back" style="margin-top:16px">
+            <button onclick="location.href='website.html'" class="btn">← Back</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Sidebar toggle (same behavior as website)
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const nav = document.getElementById('sidebar-nav');
+        if (localStorage.getItem('sidebarExpanded') === 'true') { sidebar.classList.add('expanded'); nav.classList.remove('hidden'); }
+        toggle.addEventListener('click', ()=>{
+          const expanded = sidebar.classList.toggle('expanded');
+          if (expanded) nav.classList.remove('hidden'); else nav.classList.add('hidden');
+          localStorage.setItem('sidebarExpanded', expanded);
+          toggle.title = expanded ? 'Close menu' : 'Open menu';
+        });
+
+        // populate uploads
+        const list = document.getElementById('uploaded-list');
+        const uploaded = JSON.parse(sessionStorage.getItem('uploadedImages') || '[]');
+        uploaded.forEach(u => {
+          const el = document.createElement('div'); el.className = 'thumb';
+          const img = document.createElement('img'); img.src = u.src; img.alt = u.name;
+          const name = document.createElement('div'); name.className = 'name'; name.textContent = u.name;
+          el.appendChild(img); el.appendChild(name); list.appendChild(el);
+        });
+
+        // render chart from localStorage history
+        const raw = localStorage.getItem('nutrition_history');
+        const hist = raw ? JSON.parse(raw) : {};
+        const labels = []; const values = [];
+        for(let i=6;i>=0;i--){
+          const d = new Date(); d.setDate(d.getDate() - i);
+          const key = d.toISOString().slice(0,10);
+          labels.push(d.toLocaleDateString(undefined,{weekday:'short'}));
+          values.push(hist[key] || 0);
+        }
+        const avg = values.reduce((a,b)=>a+b,0)/values.length;
+        document.getElementById('analysis-summary').textContent = `This week you processed an average of ${avg.toFixed(1)} image(s) per day.`;
+        const advice = avg >= 1.5 ? 'Good job — your activity looks consistent!' : 'Try to add more ingredients/entries this week for better tracking.';
+        const note = document.createElement('div'); note.className='metric'; note.textContent = advice; document.getElementById('analysis-summary').parentNode.insertBefore(note, document.getElementById('analysis-summary').nextSibling);
+
+        const ctx = document.getElementById('weekChart').getContext('2d');
+        window._weekChart = new Chart(ctx, {type:'bar',data:{labels,datasets:[{label:'Images processed',data:values,backgroundColor:'#cfe9d4'}]},options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
+      });
+    </script>
+  </body>
+</html>

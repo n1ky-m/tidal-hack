@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generated Recipe</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .recipe-wrap{max-width:900px;margin:40px auto;padding:24px;background:white;border-radius:10px}
+      .recipe-wrap h2{margin-top:0}
+      .ingredients{margin-top:18px}
+      .back{margin-top:18px}
+    </style>
+  </head>
+  <body>
+    <main style="padding:28px;display:flex;align-items:center;justify-content:center;min-height:80vh">
+      <div class="recipe-wrap" style="max-width:760px;box-shadow:0 10px 30px rgba(0,0,0,0.06);padding:18px;border-radius:12px;background:var(--bg)">
+        <div class="tabs" style="justify-content:center;margin-bottom:14px">
+          <button id="tab-recipe" class="tab-btn active">Recipe</button>
+          <button id="tab-analysis" class="tab-btn">Analysis</button>
+        </div>
+
+        <div id="recipe-panel" class="panel">
+          <h3 id="recipe-title">Your Recipe</h3>
+          <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:260px">
+              <h4>Ingredients</h4>
+              <ul id="ingredient-list"></ul>
+            </div>
+            <div style="flex:1;min-width:260px">
+              <h4>Instructions</h4>
+              <ol id="steps-list"></ol>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <h4>Uploaded images</h4>
+            <div id="uploaded-list" class="gallery"></div>
+          </div>
+        </div>
+
+        <div id="analysis-panel" class="panel" style="display:none;margin-top:12px">
+          <h3>Weekly Analysis</h3>
+          <p class="metric" id="analysis-summary">Loading your weekly summary...</p>
+          <div class="chart-wrap">
+            <canvas id="weekChart" width="600" height="240"></canvas>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:14px">
+          <button onclick="location.href='website.html'" class="btn">← Back</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Chart.js for analysis panel -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Tab switching + render recipe/analysis inside popup-like page
+      const tabRecipe = document.getElementById('tab-recipe');
+      const tabAnalysis = document.getElementById('tab-analysis');
+      const recipePanel = document.getElementById('recipe-panel');
+      const analysisPanel = document.getElementById('analysis-panel');
+
+      function showTab(name){
+        if(name === 'analysis'){
+          tabRecipe.classList.remove('active'); tabAnalysis.classList.add('active');
+          recipePanel.style.display = 'none'; analysisPanel.style.display = 'block';
+          renderAnalysis();
+        } else {
+          tabAnalysis.classList.remove('active'); tabRecipe.classList.add('active');
+          recipePanel.style.display = 'block'; analysisPanel.style.display = 'none';
+        }
+      }
+
+      tabRecipe.addEventListener('click', ()=> showTab('recipe'));
+      tabAnalysis.addEventListener('click', ()=> showTab('analysis'));
+
+      // Render uploaded images and create a mocked recipe (same logic as before)
+      const list = document.getElementById('uploaded-list');
+      const ingredientsEl = document.getElementById('ingredient-list');
+      const stepsEl = document.getElementById('steps-list');
+      const uploaded = JSON.parse(sessionStorage.getItem('uploadedImages') || '[]');
+
+      function renderThumb(item){
+        const el = document.createElement('div'); el.className = 'thumb';
+        const img = document.createElement('img'); img.src = item.src; img.alt = item.name;
+        const name = document.createElement('div'); name.className = 'name'; name.textContent = item.name;
+        el.appendChild(img); el.appendChild(name); list.appendChild(el);
+      }
+
+      if(uploaded.length === 0){
+        ingredientsEl.innerHTML = '<li>No images uploaded yet.</li>';
+        stepsEl.innerHTML = '<li>Add images from the Home page to generate a recipe.</li>';
+      } else {
+        const tokens = new Set();
+        uploaded.forEach(u => {
+          renderThumb(u);
+          const base = u.name.replace(/\.[^.]+$/, '').replace(/[_-]/g,' ');
+          base.split(/\s+/).forEach(t => {
+            const clean = t.replace(/[^a-zA-Z]/g,'').toLowerCase();
+            if(clean.length > 2) tokens.add(clean);
+          });
+        });
+
+        const ingredients = Array.from(tokens).slice(0,12);
+        if(ingredients.length === 0) ingredientsEl.innerHTML = '<li>Could not parse ingredients from images (demo).</li>';
+        else ingredients.forEach(i => { const li = document.createElement('li'); li.textContent = i; ingredientsEl.appendChild(li); });
+
+        const steps = [
+          'Prepare your workspace and gather ingredients.',
+          'Wash and prep the ingredients as needed.',
+          `Combine ${ingredients.slice(0,3).join(', ')} in a pan and cook until fragrant.`,
+          'Season to taste and serve warm.'
+        ];
+        steps.forEach(s => { const li = document.createElement('li'); li.textContent = s; stepsEl.appendChild(li); });
+      }
+
+      // Analysis render for popup panel
+      function renderAnalysis(){
+        const raw = localStorage.getItem('nutrition_history');
+        const hist = raw ? JSON.parse(raw) : {};
+        const labels = []; const values = [];
+        for(let i=6;i>=0;i--){
+          const d = new Date(); d.setDate(d.getDate() - i);
+          labels.push(d.toLocaleDateString(undefined, {weekday:'short'}));
+          const key = d.toISOString().slice(0,10);
+          values.push(hist[key] || 0);
+        }
+
+        const avg = values.reduce((a,b)=>a+b,0)/values.length;
+        document.getElementById('analysis-summary').textContent = `This week you processed an average of ${avg.toFixed(1)} image(s) per day.`;
+        const advice = avg >= 1.5 ? 'Good job — your activity looks consistent!' : 'Try to add more ingredients/entries this week for better tracking.';
+        const note = document.createElement('div'); note.className='metric'; note.textContent = advice; document.getElementById('analysis-summary').parentNode.insertBefore(note, document.getElementById('analysis-summary').nextSibling);
+
+        const ctx = document.getElementById('weekChart').getContext('2d');
+        if(window._weekChart) window._weekChart.destroy();
+        window._weekChart = new Chart(ctx, {type:'bar',data:{labels,datasets:[{label:'Images processed',data:values,backgroundColor:'#cfe9d4'}]},options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});
+      }
+
+      // prepare a placeholder analysis-summary element for popup usage
+      (function ensureAnalysisSummary(){
+        if(!document.getElementById('analysis-summary')){
+          const p = document.createElement('p'); p.id='analysis-summary'; p.className='metric'; p.textContent='Loading...';
+          analysisPanel.insertBefore(p, analysisPanel.querySelector('.chart-wrap'));
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ingredient Scanner — Home</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside id="sidebar" class="collapsed" aria-hidden="false">
+      <button id="sidebar-toggle" aria-label="Toggle navigation" title="Open menu">☰</button>
+      <nav id="sidebar-nav" class="hidden">
+        <a href="website.html" data-target="home" class="nav-item active">Home</a>
+  <a href="analysis.html" class="nav-item">Analysis</a>
+      </nav>
+    </aside>
+
+    <main id="main">
+      <header class="greeting">
+        <h1>Hello, <span id="username">Name</span></h1>
+        <p class="subtitle">Add images below to curate your next meal!</p>
+      </header>
+
+      <section class="upload-section">
+        <div id="upload-area" class="upload-area">
+          <input id="file-input" type="file" accept="image/*" multiple hidden />
+          <div class="upload-content" tabindex="0">
+            <p class="upload-title">Click or drag images here to import</p>
+            <p class="upload-hint">Ingredient list photos are best in good light.</p>
+          </div>
+        </div>
+
+        <div id="gallery" class="gallery" aria-live="polite"></div>
+
+        <div class="actions">
+          <button id="create-recipe" class="btn primary">Create Recipe</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
