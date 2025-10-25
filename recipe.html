@@ -6,7 +6,10 @@
     <title>Generated Recipe</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
-      .recipe-wrap{max-width:900px;margin:40px auto;padding:24px;background:white;border-radius:10px}
+      /* Popup container styling: white content card with a thin border, no shadow.
+         Surrounding page area should be a soft light green to match the mockup. */
+      body { background: #eaf3e8; }
+  .recipe-wrap{max-width:1300px;margin:60px auto;padding:48px;background:white;border-radius:10px;border:1px solid rgba(0,0,0,0.08)}
       .recipe-wrap h2{margin-top:0}
       .ingredients{margin-top:18px}
       .back{margin-top:18px}
@@ -14,7 +17,7 @@
   </head>
   <body>
     <main style="padding:28px;display:flex;align-items:center;justify-content:center;min-height:80vh">
-      <div class="recipe-wrap" style="max-width:760px;box-shadow:0 10px 30px rgba(0,0,0,0.06);padding:18px;border-radius:12px;background:var(--bg)">
+  <div class="recipe-wrap" style="max-width:1200px;padding:44px;border-radius:12px;background:#ffffff">
         <div class="tabs" style="justify-content:center;margin-bottom:14px">
           <button id="tab-recipe" class="tab-btn active">Recipe</button>
           <button id="tab-analysis" class="tab-btn">Analysis</button>

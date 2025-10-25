@@ -120,9 +120,9 @@ main#main{
 }
 
 /* Tabs for recipe/analysis */
-.tabs{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.tabs{display:flex;gap:12px;align-items:center;margin-bottom:24px}
 .tab-btn{background:transparent;border:0;padding:8px 14px;border-radius:8px;cursor:pointer;color:var(--text);font-weight:600}
 .tab-btn.active{background:#f6e9e6;color:var(--text);box-shadow:0 1px 0 rgba(0,0,0,0.04)}
-.panel{background:rgba(255,255,255,0.9);padding:18px;border-radius:10px;border:1px solid rgba(0,0,0,0.04)}
+.panel{background:#ffffff;padding:40px;border-radius:10px;border:1px solid rgba(0,0,0,0.04)}
 .chart-wrap{max-width:700px;margin-top:12px}
 .metric{font-size:14px;color:var(--muted);margin-top:8px}
